@@ -1,101 +1,64 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const input = document.getElementById("message-input");
-  const sendBtn = document.getElementById("send-btn");
-  const chatList = document.getElementById("chat-list");
+let responsesDB = [];
+let memory = []; // Keep last 5 messages for context
 
-  const memory = JSON.parse(localStorage.getItem("buddyMemory")) || [];
-  const personality = JSON.parse(localStorage.getItem("buddyPersonality")) || { playful:0, serious:0, thoughtful:0 };
+// Load responses.json
+fetch('responses.json')
+  .then(res => res.json())
+  .then(data => { responsesDB = data; });
 
-  memory.forEach(item => renderMessage(item.text, item.sender));
+// DOM elements
+const chatWindow = document.getElementById('chat-window');
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
 
-  sendBtn.addEventListener("click", sendMessage);
-  input.addEventListener("keypress", e => { if(e.key === "Enter") sendMessage(); });
+sendBtn.addEventListener('click', () => {
+  const text = userInput.value.trim();
+  if (!text) return;
 
-  function sendMessage() {
-    const message = input.value.trim();
-    if (!message) return;
-    input.value = "";
+  addMessage(text, 'user-msg');
+  userInput.value = '';
 
-    addMessage("user", message);
-
-    setTimeout(() => {
-      const reply = generateBuddyReply(message);
-      addMessage("buddy", reply);
-
-      localStorage.setItem("buddyMemory", JSON.stringify(memory));
-      localStorage.setItem("buddyPersonality", JSON.stringify(personality));
-    }, 300 + Math.random() * 300);
-  }
-
-  function addMessage(sender, text) {
-    memory.push({ sender, text });
-    renderMessage(text, sender);
-  }
-
-  function renderMessage(text, sender) {
-    const li = document.createElement("li");
-    li.classList.add("chat-item", sender === "user" ? "user-msg" : "buddy-msg");
-
-    const span = document.createElement("span");
-    span.textContent = text;
-    li.appendChild(span);
-
-    const actions = document.createElement("div");
-    actions.classList.add("action-btns");
-
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copy";
-    copyBtn.addEventListener("click", () => navigator.clipboard.writeText(text));
-    actions.appendChild(copyBtn);
-
-    const shareBtn = document.createElement("button");
-    shareBtn.textContent = "Share";
-    shareBtn.addEventListener("click", () => {
-      if(navigator.share) navigator.share({ text });
-      else alert("Share not supported");
-    });
-    actions.appendChild(shareBtn);
-
-    const replyBtn = document.createElement("button");
-    replyBtn.textContent = "Reply";
-    replyBtn.addEventListener("click", () => { input.value = text; input.focus(); });
-    actions.appendChild(replyBtn);
-
-    li.appendChild(actions);
-    chatList.appendChild(li);
-    chatList.scrollTop = chatList.scrollHeight;
-  }
-
-  function generateBuddyReply(message) {
-    const intent = detectIntent(message);
-    updatePersonality(intent);
-
-    const pools = {
-      short: ["Hey.", "Yeah?", "What’s up?", "I’m listening."],
-      question: ["Good question.", "Depends—what’s the situation?", "Let’s think about that.", "I’d say it varies."],
-      joking: ["😂 alright, fair", "I see what you did there", "You’re not wrong", "Haha, I like that."],
-      hostile: ["Alright, what’s going on?", "Let’s slow it down.", "I’m here to help, not fight.", "Take a breath."],
-      dismissive: ["You don’t sound convinced.", "Something off?", "Say it straight.", "Hmm, okay."],
-      neutral: ["I hear you.", "Go on.", "That makes sense.", "I’m listening.", "Got it."]
-    };
-
-    const pool = pools[intent] || pools.neutral;
-    return pool[Math.floor(Math.random() * pool.length)];
-  }
-
-  function detectIntent(msg) {
-    const m = msg.toLowerCase().trim();
-    if (m.length <= 3) return "short";
-    if (m.includes("?")) return "question";
-    if (["lol","😂","😆"].some(e => m.includes(e))) return "joking";
-    if (["fuck","fool","stupid","idiot"].some(w => m.includes(w))) return "hostile";
-    if (["ok","fine","whatever","sure"].includes(m)) return "dismissive";
-    return "neutral";
-  }
-
-  function updatePersonality(intent) {
-    if (intent === "joking") personality.playful++;
-    else if (intent === "hostile") personality.serious++;
-    else personality.thoughtful++;
-  }
+  const reply = generateReply(text);
+  addMessage(reply, 'buddy-msg');
 });
+
+function addMessage(text, className) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `message ${className}`;
+  msgDiv.textContent = text;
+  chatWindow.appendChild(msgDiv);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  
+  // Save memory
+  if(className === 'user-msg') {
+    memory.push(text);
+    if(memory.length > 5) memory.shift();
+  }
+}
+
+// Simple keyword-based reply + random selection
+function generateReply(inputText) {
+  inputText = inputText.toLowerCase();
+  let possibleReplies = [];
+
+  responsesDB.forEach(entry => {
+    entry.keywords.forEach(keyword => {
+      if(inputText.includes(keyword)) {
+        possibleReplies.push(...entry.responses);
+      }
+    });
+  });
+
+  if(possibleReplies.length === 0) {
+    // fallback
+    possibleReplies = ["Hmm 🤔","Tell me more 😏","Interesting..."];
+  }
+
+  // Add slight context awareness (optional)
+  if(memory.length > 1 && memory[memory.length-2].includes("bored")) {
+    possibleReplies.push("Still bored? Let’s spice things up 😎");
+  }
+
+  // Random pick
+  return possibleReplies[Math.floor(Math.random() * possibleReplies.length)];
+}
