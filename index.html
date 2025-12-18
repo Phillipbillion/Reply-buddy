@@ -1,35 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reply Buddy 🚀</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reply Buddy</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="app-container">
-
-  <header>
+  <div class="container">
     <h1>Reply Buddy</h1>
-  </header>
+    <p class="notice">Hey! I’m Buddy. I’ll reply like a friend — serious, playful, or thoughtful depending on your message 🙂</p>
 
-  <!-- Intro / Personality -->
-  <section id="intro">
-    <p>Hey! I’m Buddy. I’ll reply like a friend would — serious, playful, or thoughtful depending on your message 🙂</p>
-  </section>
-
-  <!-- Chat-like input -->
-  <section class="chat-section">
-    <textarea id="message-input" placeholder="Paste any message here..."></textarea>
-    <button id="generate-btn">Generate Reply</button>
-  </section>
-
-  <!-- Chat / replies -->
-  <section class="chat-output">
     <ul id="chat-list"></ul>
-  </section>
 
-</div>
-<script src="app.js"></script>
+    <div class="input-area">
+      <input type="text" id="message-input" placeholder="Paste any message here...">
+      <button id="generate-btn">Generate Reply</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
