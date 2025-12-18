@@ -1,64 +1,64 @@
-const input = document.getElementById("userInput");
-const sendBtn = document.getElementById("sendBtn");
-const chat = document.getElementById("chat");
+// Chat history container
+const chatBox = document.getElementById("chat-box");
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 
-sendBtn.addEventListener("click", reply);
-input.addEventListener("keypress", e => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    reply();
-  }
-});
-
-function reply() {
-  const text = input.value.trim();
-  if (!text) return;
-
-  addMessage("You", text);
-  input.value = "";
-
-  const response = generateReply(text);
-  addMessage("Buddy", response, true);
+// Random helper
+function random(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function addMessage(sender, text, actions = false) {
-  const div = document.createElement("div");
-  div.className = "message";
-  div.innerHTML = `<strong>${sender}:</strong> ${text}`;
-
-  if (actions) {
-    const actionDiv = document.createElement("div");
-    actionDiv.className = "reply-actions";
-
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copy";
-    copyBtn.onclick = () => navigator.clipboard.writeText(text);
-
-    const shareBtn = document.createElement("button");
-    shareBtn.textContent = "Share";
-    shareBtn.onclick = () => {
-      if (navigator.share) {
-        navigator.share({ text });
-      } else {
-        alert("Sharing not supported here.");
-      }
-    };
-
-    actionDiv.appendChild(copyBtn);
-    actionDiv.appendChild(shareBtn);
-    div.appendChild(actionDiv);
-  }
-
-  chat.prepend(div);
-}
-
-/* ===== BUDDY INTELLIGENCE ===== */
-
+// Generate Buddy reply
 function generateReply(msg) {
-  const m = msg.toLowerCase();
+  const m = msg.toLowerCase().trim();
 
-  // Greeting
-  if (/(hi|hello|hey|yo)/.test(m)) {
+  // 1️⃣ Identity / self questions
+  if (
+    m.includes("your name") ||
+    m.includes("who are you") ||
+    m.includes("what are you")
+  ) {
+    return "I’m Buddy. Think of me as a chill friend you can talk to — I listen, I think, and I reply honestly.";
+  }
+
+  // 2️⃣ Clear emotional signals
+  if (/(sigh|tired|sad|lonely|broken|hurt)/.test(m)) {
+    return random([
+      "That sounds heavy. Want to talk about it?",
+      "Yeah… that kind of sigh usually means something’s up.",
+      "I’m here. You don’t have to carry it alone."
+    ]);
+  }
+
+  // 3️⃣ Insults / aggression
+  if (/(fool|idiot|stupid|mad)/.test(m)) {
+    return random([
+      "😂 Easy now. What got you fired up?",
+      "Alright savage 😏 talk to me.",
+      "I won’t take it personal — what’s really going on?"
+    ]);
+  }
+
+  // 4️⃣ Debate / versus
+  if (m.includes(" vs ") || m.includes("vs.")) {
+    return random([
+      "If I had to pick? I’d go with the one who adapts faster under pressure.",
+      "That’s close, but mindset usually wins those battles.",
+      "People argue stats, I look at instincts."
+    ]);
+  }
+
+  // 5️⃣ Direct questions
+  if (m.endsWith("?")) {
+    return random([
+      "Good question. What made you ask?",
+      "Let me think… what’s your own take?",
+      "I don’t know everything, but here’s how I’d think about it."
+    ]);
+  }
+
+  // 6️⃣ Greetings (LOW priority)
+  if (/^(hi|hello|hey|yo)\b/.test(m)) {
     return random([
       "Hey 🙂 how’s your day going?",
       "Yo 👋 what’s up?",
@@ -66,51 +66,49 @@ function generateReply(msg) {
     ]);
   }
 
-  // Emotional
-  if (/(tired|sad|lonely|broken|hurt)/.test(m)) {
-    return random([
-      "That sounds heavy. Want to talk about it?",
-      "I hear you. What’s weighing on you?",
-      "Yeah… that kind of tired hits different."
-    ]);
-  }
-
-  // Insult / Roast
-  if (/(fool|idiot|stupid)/.test(m)) {
-    return random([
-      "😂 Relax, no need for violence.",
-      "If that’s how you feel, I’m listening.",
-      "Alright savage 😏 what happened?"
-    ]);
-  }
-
-  // Debate / Vs
-  if (m.includes("vs")) {
-    return random([
-      "If I had to pick? I’d choose the one with better adaptability.",
-      "That matchup is close, but instinct usually beats planning.",
-      "Honestly? Power matters less than mindset in that fight."
-    ]);
-  }
-
-  // Question
-  if (m.endsWith("?")) {
-    return random([
-      "Good question. What made you think of that?",
-      "Let me think… what’s your own take?",
-      "I don’t have the full answer, but here’s how I see it…"
-    ]);
-  }
-
-  // Default intelligent fallback
+  // 7️⃣ Intelligent fallback
   return random([
     "Hmm 🤔 say more.",
-    "Interesting. Go on.",
+    "I’m listening.",
     "That makes sense.",
-    "I see where you’re coming from."
+    "Go on."
   ]);
 }
 
-function random(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-    }
+// Add message to chat box
+function addMessage(text, from = "buddy") {
+  const div = document.createElement("div");
+  div.classList.add("reply");
+  div.innerHTML = `<strong>${from === "user" ? "You" : "Buddy"}:</strong> ${text}`;
+
+  // Add action buttons if from Buddy
+  if (from === "buddy") {
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    ["Copy", "Share", "Reply"].forEach(action => {
+      const btn = document.createElement("button");
+      btn.textContent = action;
+      btn.onclick = () => {
+        if (action === "Copy") navigator.clipboard.writeText(text);
+        if (action === "Share") alert("Share feature coming soon!");
+        if (action === "Reply") userInput.value = text;
+      };
+      actions.appendChild(btn);
+    });
+    div.appendChild(actions);
+  }
+
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Send button handler
+sendBtn.addEventListener("click", () => {
+  const msg = userInput.value.trim();
+  if (!msg) return;
+
+  addMessage(msg, "user");
+  const reply = generateReply(msg);
+  addMessage(reply, "buddy");
+  userInput.value = "";
+});
