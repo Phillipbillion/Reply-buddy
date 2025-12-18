@@ -9,24 +9,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render previous messages
   memory.forEach(item => renderMessage(item.text, item.sender));
 
-  // Send button
-  sendBtn.addEventListener("click", () => {
-    sendMessage();
-  });
-
-  // Press Enter to send
-  input.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-  });
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => { if(e.key === "Enter") sendMessage(); });
 
   function sendMessage() {
     const message = input.value.trim();
-    if (!message) return;  // Ignore empty input
+    if (!message) return;
     input.value = "";
 
     addMessage("user", message);
 
-    // Buddy reply after small delay
+    // Buddy reply with small delay
     setTimeout(() => {
       const reply = generateBuddyReply(message);
       addMessage("buddy", reply);
@@ -34,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Save memory
       localStorage.setItem("buddyMemory", JSON.stringify(memory));
       localStorage.setItem("buddyPersonality", JSON.stringify(personality));
-    }, 200 + Math.random() * 400);
+    }, 300 + Math.random() * 300);
   }
 
   function addMessage(sender, text) {
@@ -61,17 +54,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareBtn = document.createElement("button");
     shareBtn.textContent = "Share";
     shareBtn.addEventListener("click", () => {
-      if (navigator.share) navigator.share({ text });
-      else alert("Share not supported on this browser");
+      if(navigator.share) navigator.share({ text });
+      else alert("Share not supported");
     });
     actions.appendChild(shareBtn);
 
     const replyBtn = document.createElement("button");
     replyBtn.textContent = "Reply";
-    replyBtn.addEventListener("click", () => {
-      input.value = text;
-      input.focus();
-    });
+    replyBtn.addEventListener("click", () => { input.value = text; input.focus(); });
     actions.appendChild(replyBtn);
 
     li.appendChild(actions);
@@ -82,8 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function generateBuddyReply(message) {
     const intent = detectIntent(message);
     updatePersonality(intent);
-
-    const history = memory.slice(-5).map(m => m.text.toLowerCase()).join(" ");
 
     const pools = {
       short: ["Hey.", "Yeah?", "What’s up?", "I’m listening."],
