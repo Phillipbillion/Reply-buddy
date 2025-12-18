@@ -3,8 +3,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const generateBtn = document.getElementById("generate-btn");
   const chatList = document.getElementById("chat-list");
 
-  // Session memory
-  const sessionMemory = [];
+  // Load memory
+  const sessionMemory = JSON.parse(localStorage.getItem("sessionMemory")) || [];
+  const personality = JSON.parse(localStorage.getItem("buddyPersonality")) || { playfulScore: 0, seriousScore: 0, thoughtfulScore: 0 };
+
+  // Render previous messages
+  sessionMemory.forEach(item => addChatMessage(item.text, item.sender === "user" ? "user-msg" : "buddy-msg"));
 
   generateBtn.addEventListener("click", () => {
     const message = messageInput.value.trim();
@@ -14,9 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
     sessionMemory.push({ sender: "user", text: message });
 
     const tone = detectTone(message);
-    const reply = generateBuddyReply(message, tone);
+    updatePersonality(tone);
+
+    const reply = generateAdaptiveReply(message);
     addChatMessage(reply, "buddy-msg");
     sessionMemory.push({ sender: "buddy", text: reply });
+
+    // Save memory
+    localStorage.setItem("sessionMemory", JSON.stringify(sessionMemory));
+    localStorage.setItem("buddyPersonality", JSON.stringify(personality));
 
     messageInput.value = "";
   });
@@ -42,7 +52,14 @@ document.addEventListener("DOMContentLoaded", () => {
     chatList.scrollTop = chatList.scrollHeight;
   }
 
-  function generateBuddyReply(message, tone) {
+  function generateAdaptiveReply(message) {
+    // Weight personality to choose tone
+    let chosenTone = "thoughtful"; // default
+    const maxScore = Math.max(personality.playfulScore, personality.seriousScore, personality.thoughtfulScore);
+    if (maxScore === personality.playfulScore) chosenTone = "playful";
+    else if (maxScore === personality.seriousScore) chosenTone = "serious";
+
+    // Replies database
     const baseReplies = {
       playful: [
         `Haha! "${message}" 😆`,
@@ -61,10 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ]
     };
 
-    // Default fallback
-    const replies = baseReplies[tone] || [`"${message}"`];
-
-    // Random selection
+    const replies = baseReplies[chosenTone] || [`"${message}"`];
     return replies[Math.floor(Math.random() * replies.length)];
   }
 
@@ -76,6 +90,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (playfulWords.some(word => msgLower.includes(word))) return "playful";
     if (seriousWords.some(word => msgLower.includes(word))) return "serious";
 
-    return "thoughtful"; // default tone
+    return "thoughtful"; // default
+  }
+
+  function updatePersonality(tone) {
+    switch(tone){
+      case "playful": personality.playfulScore++; break;
+      case "serious": personality.seriousScore++; break;
+      case "thoughtful": personality.thoughtfulScore++; break;
+    }
   }
 });
