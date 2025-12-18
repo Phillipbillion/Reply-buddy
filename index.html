@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reply Buddy - Your AI Best Friend</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Reply Buddy</h1>
+  <p class="notice">Paste any message below and get AI-powered reply suggestions.</p>
+
+  <!-- Input box -->
+  <textarea id="message-input" placeholder="Paste the message here..."></textarea>
+
+  <!-- Tone selection -->
+  <label for="tone-select">Choose tone:</label>
+  <select id="tone-select">
+    <option value="friendly">Friendly</option>
+    <option value="professional">Professional</option>
+    <option value="persuasive">Persuasive</option>
+    <option value="funny">Funny</option>
+    <option value="calm">Calm</option>
+  </select>
+
+  <button id="generate-btn">Generate Replies</button>
+
+  <!-- Output suggestions -->
+  <div id="suggestions-container">
+    <h3>Suggested Replies:</h3>
+    <ul id="suggestions-list"></ul>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
