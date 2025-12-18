@@ -1,83 +1,68 @@
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f7f7f7;
-  color: #222;
-  display: flex;
-  justify-content: center;
-  padding-top: 20px;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #121212;
+  color: #eee;
 }
 
-.chat-container {
-  width: 100%;
-  max-width: 500px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+.app {
+  max-width: 600px;
+  margin: auto;
   padding: 20px;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 5px;
 }
 
-p {
+.subtitle {
   text-align: center;
-  margin-bottom: 15px;
-  color: #555;
+  font-size: 0.9em;
+  opacity: 0.8;
 }
 
-#chat-list {
-  list-style: none;
-  padding: 0;
-  max-height: 400px;
-  overflow-y: auto;
-  margin-bottom: 10px;
-}
-
-#chat-list li {
-  margin: 5px 0;
+textarea {
+  width: 100%;
+  height: 80px;
   padding: 10px;
-  border-radius: 10px;
-  max-width: 80%;
-  word-wrap: break-word;
-}
-
-#chat-list li.user {
-  background-color: #4CAF50;
-  color: #fff;
-  align-self: flex-end;
-  margin-left: auto;
-}
-
-#chat-list li.buddy {
-  background-color: #eee;
-  color: #222;
-  align-self: flex-start;
-  margin-right: auto;
-}
-
-.input-container {
-  display: flex;
-  gap: 10px;
-}
-
-#message-input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-#send-btn {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: #fff;
+  border-radius: 8px;
   border: none;
-  border-radius: 5px;
+  margin-top: 15px;
+  resize: none;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #4CAF50;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
 }
 
-#send-btn:hover {
-  opacity: 0.8;
+#chat {
+  margin-top: 20px;
+}
+
+.message {
+  background: #1e1e1e;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.reply-actions {
+  margin-top: 5px;
+}
+
+.reply-actions button {
+  background: none;
+  color: #4CAF50;
+  border: none;
+  margin-right: 10px;
+  cursor: pointer;
 }
