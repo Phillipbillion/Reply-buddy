@@ -43,7 +43,8 @@ function addChatMessage(msg, className) {
 // Buddy reply generator with personality
 function generateBuddyReply(message, tone) {
   let replies = [];
-  switch(tone) {
+
+  switch (tone) {
     case "playful":
       replies = [
         `Haha! "${message}" 😆`,
@@ -51,6 +52,7 @@ function generateBuddyReply(message, tone) {
         `"${message}"? That’s funny! 😎`
       ];
       break;
+
     case "serious":
       replies = [
         `I understand: "${message}". Let's handle it carefully.`,
@@ -58,6 +60,7 @@ function generateBuddyReply(message, tone) {
         `Noted: "${message}". We'll approach this wisely.`
       ];
       break;
+
     case "thoughtful":
       replies = [
         `"${message}" — I see, let's think it through.`,
@@ -65,22 +68,27 @@ function generateBuddyReply(message, tone) {
         `Considering "${message}", I feel we should...`
       ];
       break;
+
     default:
-      replies = [`"${message}"`];
+      replies = [`"${message}"`]; // fallback
   }
 
+  // Always ensure at least one reply exists
+  if (replies.length === 0) replies = [`"${message}"`];
+
+  // Randomly pick one reply to feel natural
   return replies[Math.floor(Math.random() * replies.length)];
 }
 
 // Simple tone detection (Phase 4 MVP)
 function detectTone(message) {
-  const playfulWords = ["haha","lol","😂","😆","funny","wow"];
-  const seriousWords = ["important","please","urgent","asap","careful"];
-  
+  const playfulWords = ["haha","lol","😂","😆","funny","wow","heh","yolo"];
+  const seriousWords = ["important","please","urgent","asap","careful","serious","need"];
+
   const msgLower = message.toLowerCase();
 
   if (playfulWords.some(word => msgLower.includes(word))) return "playful";
   if (seriousWords.some(word => msgLower.includes(word))) return "serious";
 
-  return "thoughtful"; // default mature/friendly tone
-} 
+  return "thoughtful"; // default tone
+}
