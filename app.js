@@ -1,7 +1,7 @@
 const messageInput = document.getElementById("message-input");
 const toneSelect = document.getElementById("tone-select");
 const generateBtn = document.getElementById("generate-btn");
-const suggestionsList = document.getElementById("suggestions-list");
+const chatList = document.getElementById("chat-list");
 const themeToggleBtn = document.getElementById("theme-toggle-btn");
 const body = document.body;
 
@@ -16,81 +16,88 @@ themeToggleBtn.addEventListener("click", () => {
   themeToggleBtn.textContent = body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
 });
 
-// Generate replies
+// Generate reply
 generateBtn.addEventListener("click", () => {
   const message = messageInput.value.trim();
   const tone = toneSelect.value;
 
-  if (!message) return alert("Please paste a message first!");
+  if (!message) return alert("Paste a message first!");
 
-  // Save last tone
   localStorage.setItem("lastTone", tone);
 
-  const replies = generateReplies(message, tone);
-  displayReplies(replies);
+  // Show user message first
+  addChatMessage(message, "user-msg");
+
+  // Generate Buddy reply
+  const reply = generateBuddyReply(message, tone);
+  addChatMessage(reply, "buddy-msg");
+
+  // Clear input
+  messageInput.value = "";
 });
 
-// Display replies with copy buttons
-function displayReplies(replies) {
-  suggestionsList.innerHTML = "";
-  replies.forEach(reply => {
-    const li = document.createElement("li");
-    li.textContent = reply;
+// Add chat message to list
+function addChatMessage(msg, className) {
+  const li = document.createElement("li");
+  li.textContent = msg;
+  li.classList.add("chat-item", className);
 
-    const copyBtn = document.createElement("button");
-    copyBtn.textContent = "Copy";
-    copyBtn.classList.add("copy-btn");
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(reply);
-      alert("Copied to clipboard!");
-    });
-
-    li.appendChild(copyBtn);
-    suggestionsList.appendChild(li);
+  const copyBtn = document.createElement("button");
+  copyBtn.textContent = "Copy";
+  copyBtn.classList.add("copy-btn");
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(msg);
+    alert("Copied to clipboard!");
   });
+
+  li.appendChild(copyBtn);
+  chatList.appendChild(li);
+  chatList.scrollTop = chatList.scrollHeight;
 }
 
-// Placeholder reply generator (Phase 1)
-function generateReplies(message, tone) {
+// Buddy reply generator (Phase 3 personality)
+function generateBuddyReply(message, tone) {
   let replies = [];
   switch(tone) {
     case "friendly":
       replies = [
-        `Hey! Thanks for your message: "${message}" 🙂`,
-        `Got it! I really appreciate it: "${message}" 😄`,
-        `Hi! Just saw your message: "${message}" 😎`
+        `Hey! I read your message: "${message}" 🙂`,
+        `Got it! "${message}" sounds interesting 😄`,
+        `Hi there! Just saw: "${message}" 😎`
       ];
       break;
     case "professional":
       replies = [
-        `Thank you for your message: "${message}". I will review and get back to you.`,
-        `I acknowledge receipt of: "${message}". I will respond shortly.`,
-        `Appreciate your message: "${message}". I will follow up soon.`
+        `Thank you for your message: "${message}". I will review.`,
+        `Acknowledged: "${message}". I’ll respond shortly.`,
+        `"${message}" has been noted.`
       ];
       break;
     case "persuasive":
       replies = [
-        `I see your point regarding: "${message}". Here's why we should proceed...`,
-        `Considering: "${message}", I strongly recommend we...`,
-        `After reviewing "${message}", it would be beneficial to...`
+        `Considering "${message}", I strongly suggest we proceed...`,
+        `Based on "${message}", it would be best to...`,
+        `"${message}" gives us a good reason to...`
       ];
       break;
     case "funny":
       replies = [
-        `Haha! I read: "${message}" 😂`,
-        `LOL, "${message}" made me chuckle! 😆`,
-        `"${message}"? Classic! 😎`
+        `Haha! "${message}" made me laugh 😂`,
+        `"${message}"? Classic! 😆`,
+        `LOL, just read: "${message}" 😎`
       ];
       break;
     case "calm":
       replies = [
         `I understand: "${message}". No worries.`,
-        `Got it. "${message}"`,
-        `"${message}" — everything is fine, let's proceed calmly.`
+        `"${message}" — everything is fine, let's proceed calmly.`,
+        `Got it. "${message}"`
       ];
       break;
     default:
       replies = [`${message}`];
   }
-  return replies;
+
+  // Randomly pick one to feel natural
+  return replies[Math.floor(Math.random() * replies.length)];
 }
