@@ -1,32 +1,17 @@
 const messageInput = document.getElementById("message-input");
-const toneSelect = document.getElementById("tone-select");
 const generateBtn = document.getElementById("generate-btn");
 const chatList = document.getElementById("chat-list");
-const themeToggleBtn = document.getElementById("theme-toggle-btn");
-const body = document.body;
-
-// Load last selected tone
-const savedTone = localStorage.getItem("lastTone");
-if (savedTone) toneSelect.value = savedTone;
-
-// Theme toggle
-themeToggleBtn.addEventListener("click", () => {
-  body.classList.toggle("dark-mode");
-  body.classList.toggle("light-mode");
-  themeToggleBtn.textContent = body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
-});
 
 // Generate reply
 generateBtn.addEventListener("click", () => {
   const message = messageInput.value.trim();
-  const tone = toneSelect.value;
-
   if (!message) return alert("Paste a message first!");
-
-  localStorage.setItem("lastTone", tone);
 
   // Show user message first
   addChatMessage(message, "user-msg");
+
+  // Detect tone automatically
+  const tone = detectTone(message);
 
   // Generate Buddy reply
   const reply = generateBuddyReply(message, tone);
@@ -55,49 +40,47 @@ function addChatMessage(msg, className) {
   chatList.scrollTop = chatList.scrollHeight;
 }
 
-// Buddy reply generator (Phase 3 personality)
+// Buddy reply generator with personality
 function generateBuddyReply(message, tone) {
   let replies = [];
   switch(tone) {
-    case "friendly":
+    case "playful":
       replies = [
-        `Hey! I read your message: "${message}" 🙂`,
-        `Got it! "${message}" sounds interesting 😄`,
-        `Hi there! Just saw: "${message}" 😎`
+        `Haha! "${message}" 😆`,
+        `LOL, just read: "${message}" 😂`,
+        `"${message}"? That’s funny! 😎`
       ];
       break;
-    case "professional":
+    case "serious":
       replies = [
-        `Thank you for your message: "${message}". I will review.`,
-        `Acknowledged: "${message}". I’ll respond shortly.`,
-        `"${message}" has been noted.`
+        `I understand: "${message}". Let's handle it carefully.`,
+        `"${message}" is important. Here's what I think...`,
+        `Noted: "${message}". We'll approach this wisely.`
       ];
       break;
-    case "persuasive":
+    case "thoughtful":
       replies = [
-        `Considering "${message}", I strongly suggest we proceed...`,
-        `Based on "${message}", it would be best to...`,
-        `"${message}" gives us a good reason to...`
-      ];
-      break;
-    case "funny":
-      replies = [
-        `Haha! "${message}" made me laugh 😂`,
-        `"${message}"? Classic! 😆`,
-        `LOL, just read: "${message}" 😎`
-      ];
-      break;
-    case "calm":
-      replies = [
-        `I understand: "${message}". No worries.`,
-        `"${message}" — everything is fine, let's proceed calmly.`,
-        `Got it. "${message}"`
+        `"${message}" — I see, let's think it through.`,
+        `Thanks for sharing: "${message}". Here's my insight...`,
+        `Considering "${message}", I feel we should...`
       ];
       break;
     default:
-      replies = [`${message}`];
+      replies = [`"${message}"`];
   }
 
-  // Randomly pick one to feel natural
   return replies[Math.floor(Math.random() * replies.length)];
 }
+
+// Simple tone detection (Phase 4 MVP)
+function detectTone(message) {
+  const playfulWords = ["haha","lol","😂","😆","funny","wow"];
+  const seriousWords = ["important","please","urgent","asap","careful"];
+  
+  const msgLower = message.toLowerCase();
+
+  if (playfulWords.some(word => msgLower.includes(word))) return "playful";
+  if (seriousWords.some(word => msgLower.includes(word))) return "serious";
+
+  return "thoughtful"; // default mature/friendly tone
+} 
