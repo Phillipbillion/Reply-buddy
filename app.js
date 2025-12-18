@@ -2,23 +2,37 @@ const messageInput = document.getElementById("message-input");
 const toneSelect = document.getElementById("tone-select");
 const generateBtn = document.getElementById("generate-btn");
 const suggestionsList = document.getElementById("suggestions-list");
+const themeToggleBtn = document.getElementById("theme-toggle-btn");
+const body = document.body;
 
-// Load saved replies (optional)
-let pastReplies = JSON.parse(localStorage.getItem("pastReplies")) || [];
+// Load last selected tone
+const savedTone = localStorage.getItem("lastTone");
+if (savedTone) toneSelect.value = savedTone;
 
+// Theme toggle
+themeToggleBtn.addEventListener("click", () => {
+  body.classList.toggle("dark-mode");
+  body.classList.toggle("light-mode");
+  themeToggleBtn.textContent = body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
+});
+
+// Generate replies
 generateBtn.addEventListener("click", () => {
   const message = messageInput.value.trim();
   const tone = toneSelect.value;
 
   if (!message) return alert("Please paste a message first!");
 
-  // Generate 3 replies
+  // Save last tone
+  localStorage.setItem("lastTone", tone);
+
   const replies = generateReplies(message, tone);
+  displayReplies(replies);
+});
 
-  // Clear previous suggestions
+// Display replies with copy buttons
+function displayReplies(replies) {
   suggestionsList.innerHTML = "";
-
-  // Display suggestions
   replies.forEach(reply => {
     const li = document.createElement("li");
     li.textContent = reply;
@@ -34,13 +48,9 @@ generateBtn.addEventListener("click", () => {
     li.appendChild(copyBtn);
     suggestionsList.appendChild(li);
   });
+}
 
-  // Save last replies locally
-  pastReplies = replies;
-  localStorage.setItem("pastReplies", JSON.stringify(pastReplies));
-});
-
-// Simple reply generator (can later integrate GPT API)
+// Placeholder reply generator (Phase 1)
 function generateReplies(message, tone) {
   let replies = [];
   switch(tone) {
@@ -82,6 +92,5 @@ function generateReplies(message, tone) {
     default:
       replies = [`${message}`];
   }
-
   return replies;
-        }
+}
