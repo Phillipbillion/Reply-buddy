@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const memory = JSON.parse(localStorage.getItem("buddyMemory")) || [];
   const personality = JSON.parse(localStorage.getItem("buddyPersonality")) || { playful:0, serious:0, thoughtful:0 };
 
-  // Render previous messages
   memory.forEach(item => renderMessage(item.text, item.sender));
 
   sendBtn.addEventListener("click", sendMessage);
@@ -19,12 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     addMessage("user", message);
 
-    // Buddy reply with small delay
     setTimeout(() => {
       const reply = generateBuddyReply(message);
       addMessage("buddy", reply);
 
-      // Save memory
       localStorage.setItem("buddyMemory", JSON.stringify(memory));
       localStorage.setItem("buddyPersonality", JSON.stringify(personality));
     }, 300 + Math.random() * 300);
