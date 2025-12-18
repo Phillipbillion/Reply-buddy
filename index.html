@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reply Buddy</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Reply Buddy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="chat-container">
-  <h1>Reply Buddy 🤖</h1>
-  <p>Buddy reacts naturally — serious, playful, or thoughtful depending on your message 🙂</p>
-  
-  <ul id="chat-list"></ul>
 
-  <div class="input-container">
-    <input type="text" id="message-input" placeholder="Type your message...">
-    <button id="send-btn">Send</button>
-  </div>
+<div class="app">
+  <h1>Reply Buddy 🤖</h1>
+  <p class="subtitle">
+    Buddy reacts naturally — serious, playful, or thoughtful depending on your message 🙂
+  </p>
+
+  <textarea id="userInput" placeholder="Say something..."></textarea>
+
+  <button id="sendBtn">Send</button>
+
+  <div id="chat"></div>
 </div>
 
 <script src="app.js"></script>
