@@ -7,10 +7,10 @@ generateBtn.addEventListener("click", () => {
   const message = messageInput.value.trim();
   if (!message) return alert("Paste a message first!");
 
-  // Show user message first
+  // Show user message
   addChatMessage(message, "user-msg");
 
-  // Detect tone automatically
+  // Detect tone
   const tone = detectTone(message);
 
   // Generate Buddy reply
@@ -24,9 +24,14 @@ generateBtn.addEventListener("click", () => {
 // Add chat message to list
 function addChatMessage(msg, className) {
   const li = document.createElement("li");
-  li.textContent = msg;
   li.classList.add("chat-item", className);
 
+  // Create text container
+  const textSpan = document.createElement("span");
+  textSpan.textContent = msg;
+  li.appendChild(textSpan);
+
+  // Create copy button
   const copyBtn = document.createElement("button");
   copyBtn.textContent = "Copy";
   copyBtn.classList.add("copy-btn");
@@ -34,13 +39,13 @@ function addChatMessage(msg, className) {
     navigator.clipboard.writeText(msg);
     alert("Copied to clipboard!");
   });
-
   li.appendChild(copyBtn);
+
   chatList.appendChild(li);
   chatList.scrollTop = chatList.scrollHeight;
 }
 
-// Buddy reply generator with personality
+// Buddy reply generator
 function generateBuddyReply(message, tone) {
   let replies = [];
 
@@ -52,7 +57,6 @@ function generateBuddyReply(message, tone) {
         `"${message}"? That’s funny! 😎`
       ];
       break;
-
     case "serious":
       replies = [
         `I understand: "${message}". Let's handle it carefully.`,
@@ -60,7 +64,6 @@ function generateBuddyReply(message, tone) {
         `Noted: "${message}". We'll approach this wisely.`
       ];
       break;
-
     case "thoughtful":
       replies = [
         `"${message}" — I see, let's think it through.`,
@@ -68,19 +71,16 @@ function generateBuddyReply(message, tone) {
         `Considering "${message}", I feel we should...`
       ];
       break;
-
     default:
-      replies = [`"${message}"`]; // fallback
+      replies = [`"${message}"`];
   }
 
-  // Always ensure at least one reply exists
   if (replies.length === 0) replies = [`"${message}"`];
 
-  // Randomly pick one reply to feel natural
   return replies[Math.floor(Math.random() * replies.length)];
 }
 
-// Simple tone detection (Phase 4 MVP)
+// Simple tone detection
 function detectTone(message) {
   const playfulWords = ["haha","lol","😂","😆","funny","wow","heh","yolo"];
   const seriousWords = ["important","please","urgent","asap","careful","serious","need"];
@@ -90,5 +90,5 @@ function detectTone(message) {
   if (playfulWords.some(word => msgLower.includes(word))) return "playful";
   if (seriousWords.some(word => msgLower.includes(word))) return "serious";
 
-  return "thoughtful"; // default tone
+  return "thoughtful"; // default
 }
