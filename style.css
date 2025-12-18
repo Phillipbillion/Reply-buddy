@@ -2,6 +2,8 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+  background-color: #f7f7f7;
+  color: #222;
   transition: background 0.3s, color 0.3s;
 }
 
@@ -11,23 +13,8 @@ body {
   padding: 20px;
 }
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 header h1 {
   margin: 0;
-}
-
-header button {
-  padding: 5px 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
 }
 
 textarea {
@@ -40,21 +27,12 @@ textarea {
   border: 1px solid #ccc;
 }
 
-.controls {
-  display: flex;
-  align-items: center;
+button {
   margin-top: 10px;
-  gap: 10px;
-}
-
-select, button {
-  padding: 10px;
+  padding: 10px 15px;
   border-radius: 5px;
   border: none;
   cursor: pointer;
-}
-
-button {
   background-color: #4CAF50;
   color: white;
 }
@@ -111,20 +89,6 @@ button:hover {
 
 .copy-btn:hover {
   opacity: 0.8;
-}
-
-/* Dark mode */
-body.dark-mode {
-  background-color: #121212;
-  color: #eee;
-}
-
-body.dark-mode .user-msg {
-  background-color: #1e1e1e;
-}
-
-body.dark-mode .buddy-msg {
-  background-color: #2e4a6d;
 }
 
 /* Animation */
