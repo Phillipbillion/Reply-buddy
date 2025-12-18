@@ -17,9 +17,7 @@ body {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-h1 {
-  text-align: center;
-}
+h1 { text-align: center; }
 
 .notice {
   text-align: center;
@@ -69,14 +67,9 @@ h1 {
   cursor: pointer;
 }
 
-.copy-btn:hover {
-  opacity: 0.8;
-}
+.copy-btn:hover { opacity: 0.8; }
 
-.input-area {
-  display: flex;
-  gap: 10px;
-}
+.input-area { display: flex; gap: 10px; }
 
 #message-input {
   flex: 1;
@@ -94,6 +87,4 @@ h1 {
   cursor: pointer;
 }
 
-#generate-btn:hover {
-  opacity: 0.8;
-}
+#generate-btn:hover { opacity: 0.8; }
