@@ -5,7 +5,7 @@ const messageInput = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
 const chatList = document.getElementById("chat-list");
 
-// Pre-written known replies (common greetings, small talk)
+// Pre-written known replies
 const knownReplies = {
   "hi": "Hey! How's it going? 🙂",
   "hello": "Hello there! 😎",
@@ -15,7 +15,7 @@ const knownReplies = {
   "lol": "Haha 😂 You're funny!"
 };
 
-// Personality templates for unknown input
+// Personality templates
 const personalities = ["serious", "playful", "sassy", "thoughtful"];
 
 function generateOpinion(input) {
