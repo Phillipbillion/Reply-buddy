@@ -7,20 +7,19 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-container">
-    <header>
-      <h1>Reply Buddy</h1>
-      <p>Buddy reacts naturally — serious, playful, or thoughtful depending on your message 🙂</p>
-    </header>
+<div class="container">
+  <h1>Reply Buddy</h1>
+  <p>Buddy reacts naturally — serious, playful, or roast depending on your message 🙂</p>
 
-    <ul id="chat-list" class="chat-list"></ul>
-
-    <div class="input-area">
-      <input type="text" id="message-input" placeholder="Type or paste a message here...">
-      <button id="send-btn">Send</button>
-    </div>
+  <div id="chat-window">
+    <!-- Messages appear here -->
   </div>
 
-  <script src="app.js"></script>
+  <div id="input-panel">
+    <textarea id="user-input" placeholder="Type your message..."></textarea>
+    <button id="send-btn">Send</button>
+  </div>
+</div>
+<script src="app.js"></script>
 </body>
 </html>
