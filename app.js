@@ -9,20 +9,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render previous messages
   memory.forEach(item => renderMessage(item.text, item.sender));
 
-  sendBtn.addEventListener("click", () => {
+  sendBtn.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => { if(e.key === "Enter") sendMessage(); });
+
+  function sendMessage() {
     const message = input.value.trim();
     if (!message) return;
-
-    addMessage("user", message);
     input.value = "";
 
-    const reply = generateBuddyReply(message);
-    addMessage("buddy", reply);
+    addMessage("user", message);
 
-    // Save memory
-    localStorage.setItem("buddyMemory", JSON.stringify(memory));
-    localStorage.setItem("buddyPersonality", JSON.stringify(personality));
-  });
+    // Generate Buddy reply with small delay
+    setTimeout(() => {
+      const reply = generateBuddyReply(message);
+      addMessage("buddy", reply);
+
+      // Save memory
+      localStorage.setItem("buddyMemory", JSON.stringify(memory));
+      localStorage.setItem("buddyPersonality", JSON.stringify(personality));
+    }, 200 + Math.random() * 400);
+  }
 
   function addMessage(sender, text) {
     memory.push({ sender, text });
@@ -48,20 +54,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareBtn = document.createElement("button");
     shareBtn.textContent = "Share";
     shareBtn.addEventListener("click", () => {
-      if (navigator.share) {
-        navigator.share({ text });
-      } else {
-        alert("Share not supported on this browser");
-      }
+      if (navigator.share) navigator.share({ text });
+      else alert("Share not supported on this browser");
     });
     actions.appendChild(shareBtn);
 
     const replyBtn = document.createElement("button");
     replyBtn.textContent = "Reply";
-    replyBtn.addEventListener("click", () => {
-      input.value = text;
-      input.focus();
-    });
+    replyBtn.addEventListener("click", () => { input.value = text; input.focus(); });
     actions.appendChild(replyBtn);
 
     li.appendChild(actions);
@@ -73,16 +73,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const intent = detectIntent(message);
     updatePersonality(intent);
 
-    const pools = {
-      short: ["Hey.", "Yeah?", "What’s up?"],
-      question: ["Good question.", "Depends—what’s the situation?", "Let’s think about that."],
-      joking: ["😂 alright, fair", "I see what you did there", "You’re not wrong"],
-      hostile: ["Alright, what’s going on?", "Let’s slow it down.", "I’m here to help, not fight."],
-      dismissive: ["You don’t sound convinced.", "Something off?", "Say it straight."],
-      neutral: ["I hear you.", "Go on.", "That makes sense.", "I’m listening."]
+    const history = memory.slice(-5).map(m => m.text.toLowerCase()).join(" ");
+
+    // Context-aware tweak
+    const contextualReplies = {
+      short: ["Hey.", "Yeah?", "What’s up?", "I’m listening."],
+      question: ["Good question.", "Depends—what’s the situation?", "Let’s think about that.", "I’d say it varies."],
+      joking: ["😂 alright, fair", "I see what you did there", "You’re not wrong", "Haha, I like that."],
+      hostile: ["Alright, what’s going on?", "Let’s slow it down.", "I’m here to help, not fight.", "Take a breath."],
+      dismissive: ["You don’t sound convinced.", "Something off?", "Say it straight.", "Hmm, okay."],
+      neutral: ["I hear you.", "Go on.", "That makes sense.", "I’m listening.", "Got it."]
     };
 
-    const pool = pools[intent] || pools.neutral;
+    const pool = contextualReplies[intent] || contextualReplies.neutral;
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
