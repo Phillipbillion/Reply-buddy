@@ -1,64 +1,71 @@
-let responsesDB = [];
-let memory = []; // Keep last 5 messages for context
-
-// Load responses.json
-fetch('responses.json')
-  .then(res => res.json())
-  .then(data => { responsesDB = data; });
+// ====== Reply Buddy Offline-Hybrid AI ======
 
 // DOM elements
-const chatWindow = document.getElementById('chat-window');
-const userInput = document.getElementById('user-input');
-const sendBtn = document.getElementById('send-btn');
+const messageInput = document.getElementById("message-input");
+const sendBtn = document.getElementById("send-btn");
+const chatList = document.getElementById("chat-list");
 
-sendBtn.addEventListener('click', () => {
-  const text = userInput.value.trim();
-  if (!text) return;
+// Pre-written known replies (common greetings, small talk)
+const knownReplies = {
+  "hi": "Hey! How's it going? 🙂",
+  "hello": "Hello there! 😎",
+  "how are you": "I'm Buddy! Feeling chatty 😏 How about you?",
+  "good morning": "Good morning! Ready to tackle the day? 🌞",
+  "good night": "Night! Sleep tight 😴",
+  "lol": "Haha 😂 You're funny!"
+};
 
-  addMessage(text, 'user-msg');
-  userInput.value = '';
+// Personality templates for unknown input
+const personalities = ["serious", "playful", "sassy", "thoughtful"];
 
-  const reply = generateReply(text);
-  addMessage(reply, 'buddy-msg');
+function generateOpinion(input) {
+  const personality = personalities[Math.floor(Math.random() * personalities.length)];
+  switch(personality) {
+    case "serious":
+      return `Hmm 🤔 based on my thinking, I’d say "${input}" is pretty interesting.`;
+    case "playful":
+      return `Haha 😆 I’d totally go with "${input}" just for fun!`;
+    case "sassy":
+      return `Oh really? 😏 "${input}" seems too easy to beat, my friend.`;
+    case "thoughtful":
+      return `Let me think… 🧐 "${input}" could go either way, honestly.`;
+  }
+}
+
+// Handle user message
+function handleMessage(input) {
+  const lowerInput = input.toLowerCase().trim();
+  
+  if (knownReplies[lowerInput]) {
+    return knownReplies[lowerInput];
+  } else {
+    // Offline: generate Buddy's own opinion
+    return generateOpinion(input);
+  }
+}
+
+// Add message to chat
+function addMessage(sender, text) {
+  const li = document.createElement("li");
+  li.className = sender;
+  li.textContent = text;
+  chatList.appendChild(li);
+  chatList.scrollTop = chatList.scrollHeight; // Auto-scroll
+}
+
+// Send button
+sendBtn.addEventListener("click", () => {
+  const input = messageInput.value.trim();
+  if (!input) return;
+
+  addMessage("user", input);
+  const reply = handleMessage(input);
+  addMessage("buddy", reply);
+
+  messageInput.value = "";
 });
 
-function addMessage(text, className) {
-  const msgDiv = document.createElement('div');
-  msgDiv.className = `message ${className}`;
-  msgDiv.textContent = text;
-  chatWindow.appendChild(msgDiv);
-  chatWindow.scrollTop = chatWindow.scrollHeight;
-  
-  // Save memory
-  if(className === 'user-msg') {
-    memory.push(text);
-    if(memory.length > 5) memory.shift();
-  }
-}
-
-// Simple keyword-based reply + random selection
-function generateReply(inputText) {
-  inputText = inputText.toLowerCase();
-  let possibleReplies = [];
-
-  responsesDB.forEach(entry => {
-    entry.keywords.forEach(keyword => {
-      if(inputText.includes(keyword)) {
-        possibleReplies.push(...entry.responses);
-      }
-    });
-  });
-
-  if(possibleReplies.length === 0) {
-    // fallback
-    possibleReplies = ["Hmm 🤔","Tell me more 😏","Interesting..."];
-  }
-
-  // Add slight context awareness (optional)
-  if(memory.length > 1 && memory[memory.length-2].includes("bored")) {
-    possibleReplies.push("Still bored? Let’s spice things up 😎");
-  }
-
-  // Random pick
-  return possibleReplies[Math.floor(Math.random() * possibleReplies.length)];
-}
+// Allow pressing Enter to send
+messageInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendBtn.click();
+});
