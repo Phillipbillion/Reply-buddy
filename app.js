@@ -1,103 +1,104 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const messageInput = document.getElementById("message-input");
-  const generateBtn = document.getElementById("generate-btn");
+  const input = document.getElementById("message-input");
+  const sendBtn = document.getElementById("send-btn");
   const chatList = document.getElementById("chat-list");
 
-  // Load memory
-  const sessionMemory = JSON.parse(localStorage.getItem("sessionMemory")) || [];
-  const personality = JSON.parse(localStorage.getItem("buddyPersonality")) || { playfulScore: 0, seriousScore: 0, thoughtfulScore: 0 };
+  const memory = JSON.parse(localStorage.getItem("buddyMemory")) || [];
+  const personality = JSON.parse(localStorage.getItem("buddyPersonality")) || { playful:0, serious:0, thoughtful:0 };
 
   // Render previous messages
-  sessionMemory.forEach(item => addChatMessage(item.text, item.sender === "user" ? "user-msg" : "buddy-msg"));
+  memory.forEach(item => renderMessage(item.text, item.sender));
 
-  generateBtn.addEventListener("click", () => {
-    const message = messageInput.value.trim();
-    if (!message) return alert("Paste a message first!");
+  sendBtn.addEventListener("click", () => {
+    const message = input.value.trim();
+    if (!message) return;
 
-    addChatMessage(message, "user-msg");
-    sessionMemory.push({ sender: "user", text: message });
+    addMessage("user", message);
+    input.value = "";
 
-    const tone = detectTone(message);
-    updatePersonality(tone);
-
-    const reply = generateAdaptiveReply(message);
-    addChatMessage(reply, "buddy-msg");
-    sessionMemory.push({ sender: "buddy", text: reply });
+    const reply = generateBuddyReply(message);
+    addMessage("buddy", reply);
 
     // Save memory
-    localStorage.setItem("sessionMemory", JSON.stringify(sessionMemory));
+    localStorage.setItem("buddyMemory", JSON.stringify(memory));
     localStorage.setItem("buddyPersonality", JSON.stringify(personality));
-
-    messageInput.value = "";
   });
 
-  function addChatMessage(msg, className) {
-    const li = document.createElement("li");
-    li.classList.add("chat-item", className);
+  function addMessage(sender, text) {
+    memory.push({ sender, text });
+    renderMessage(text, sender);
+  }
 
-    const textSpan = document.createElement("span");
-    textSpan.textContent = msg;
-    li.appendChild(textSpan);
+  function renderMessage(text, sender) {
+    const li = document.createElement("li");
+    li.classList.add("chat-item", sender === "user" ? "user-msg" : "buddy-msg");
+
+    const span = document.createElement("span");
+    span.textContent = text;
+    li.appendChild(span);
+
+    const actions = document.createElement("div");
+    actions.classList.add("action-btns");
 
     const copyBtn = document.createElement("button");
     copyBtn.textContent = "Copy";
-    copyBtn.classList.add("copy-btn");
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(msg);
-      alert("Copied to clipboard!");
-    });
-    li.appendChild(copyBtn);
+    copyBtn.addEventListener("click", () => navigator.clipboard.writeText(text));
+    actions.appendChild(copyBtn);
 
+    const shareBtn = document.createElement("button");
+    shareBtn.textContent = "Share";
+    shareBtn.addEventListener("click", () => {
+      if (navigator.share) {
+        navigator.share({ text });
+      } else {
+        alert("Share not supported on this browser");
+      }
+    });
+    actions.appendChild(shareBtn);
+
+    const replyBtn = document.createElement("button");
+    replyBtn.textContent = "Reply";
+    replyBtn.addEventListener("click", () => {
+      input.value = text;
+      input.focus();
+    });
+    actions.appendChild(replyBtn);
+
+    li.appendChild(actions);
     chatList.appendChild(li);
     chatList.scrollTop = chatList.scrollHeight;
   }
 
-  function generateAdaptiveReply(message) {
-    // Weight personality to choose tone
-    let chosenTone = "thoughtful"; // default
-    const maxScore = Math.max(personality.playfulScore, personality.seriousScore, personality.thoughtfulScore);
-    if (maxScore === personality.playfulScore) chosenTone = "playful";
-    else if (maxScore === personality.seriousScore) chosenTone = "serious";
+  function generateBuddyReply(message) {
+    const intent = detectIntent(message);
+    updatePersonality(intent);
 
-    // Replies database
-    const baseReplies = {
-      playful: [
-        `Haha! "${message}" 😆`,
-        `LOL, just read: "${message}" 😂`,
-        `"${message}"? That’s funny! 😎`
-      ],
-      serious: [
-        `I understand: "${message}". Let's handle it carefully.`,
-        `"${message}" is important. Here's what I think...`,
-        `Noted: "${message}". We'll approach this wisely.`
-      ],
-      thoughtful: [
-        `"${message}" — I see, let's think it through.`,
-        `Thanks for sharing: "${message}". Here's my insight...`,
-        `Considering "${message}", I feel we should...`
-      ]
+    const pools = {
+      short: ["Hey.", "Yeah?", "What’s up?"],
+      question: ["Good question.", "Depends—what’s the situation?", "Let’s think about that."],
+      joking: ["😂 alright, fair", "I see what you did there", "You’re not wrong"],
+      hostile: ["Alright, what’s going on?", "Let’s slow it down.", "I’m here to help, not fight."],
+      dismissive: ["You don’t sound convinced.", "Something off?", "Say it straight."],
+      neutral: ["I hear you.", "Go on.", "That makes sense.", "I’m listening."]
     };
 
-    const replies = baseReplies[chosenTone] || [`"${message}"`];
-    return replies[Math.floor(Math.random() * replies.length)];
+    const pool = pools[intent] || pools.neutral;
+    return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  function detectTone(message) {
-    const playfulWords = ["haha","lol","😂","😆","funny","wow","heh","yolo"];
-    const seriousWords = ["important","please","urgent","asap","careful","serious","need"];
-
-    const msgLower = message.toLowerCase();
-    if (playfulWords.some(word => msgLower.includes(word))) return "playful";
-    if (seriousWords.some(word => msgLower.includes(word))) return "serious";
-
-    return "thoughtful"; // default
+  function detectIntent(msg) {
+    const m = msg.toLowerCase().trim();
+    if (m.length <= 3) return "short";
+    if (m.includes("?")) return "question";
+    if (["lol","😂","😆"].some(e => m.includes(e))) return "joking";
+    if (["fuck","fool","stupid","idiot"].some(w => m.includes(w))) return "hostile";
+    if (["ok","fine","whatever","sure"].includes(m)) return "dismissive";
+    return "neutral";
   }
 
-  function updatePersonality(tone) {
-    switch(tone){
-      case "playful": personality.playfulScore++; break;
-      case "serious": personality.seriousScore++; break;
-      case "thoughtful": personality.thoughtfulScore++; break;
-    }
+  function updatePersonality(intent) {
+    if (intent === "joking") personality.playful++;
+    else if (intent === "hostile") personality.serious++;
+    else personality.thoughtful++;
   }
 });
