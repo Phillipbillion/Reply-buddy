@@ -9,17 +9,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render previous messages
   memory.forEach(item => renderMessage(item.text, item.sender));
 
-  sendBtn.addEventListener("click", sendMessage);
-  input.addEventListener("keypress", e => { if(e.key === "Enter") sendMessage(); });
+  // Send button
+  sendBtn.addEventListener("click", () => {
+    sendMessage();
+  });
+
+  // Press Enter to send
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+  });
 
   function sendMessage() {
     const message = input.value.trim();
-    if (!message) return;
+    if (!message) return;  // Ignore empty input
     input.value = "";
 
     addMessage("user", message);
 
-    // Generate Buddy reply with small delay
+    // Buddy reply after small delay
     setTimeout(() => {
       const reply = generateBuddyReply(message);
       addMessage("buddy", reply);
@@ -61,7 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const replyBtn = document.createElement("button");
     replyBtn.textContent = "Reply";
-    replyBtn.addEventListener("click", () => { input.value = text; input.focus(); });
+    replyBtn.addEventListener("click", () => {
+      input.value = text;
+      input.focus();
+    });
     actions.appendChild(replyBtn);
 
     li.appendChild(actions);
@@ -75,8 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const history = memory.slice(-5).map(m => m.text.toLowerCase()).join(" ");
 
-    // Context-aware tweak
-    const contextualReplies = {
+    const pools = {
       short: ["Hey.", "Yeah?", "What’s up?", "I’m listening."],
       question: ["Good question.", "Depends—what’s the situation?", "Let’s think about that.", "I’d say it varies."],
       joking: ["😂 alright, fair", "I see what you did there", "You’re not wrong", "Haha, I like that."],
@@ -85,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
       neutral: ["I hear you.", "Go on.", "That makes sense.", "I’m listening.", "Got it."]
     };
 
-    const pool = contextualReplies[intent] || contextualReplies.neutral;
+    const pool = pools[intent] || pools.neutral;
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
